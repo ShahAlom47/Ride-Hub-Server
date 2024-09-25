@@ -66,8 +66,8 @@ const getBikeData = async (req: Request, res: Response): Promise<void> => {
 
 const getBikeDetails = async (req: Request, res: Response): Promise<void> => {
     const id = req.params.id
-    try{
-        const data= await bikeDataCollection.findOne({_id: new ObjectId(id)})
+    try {
+        const data = await bikeDataCollection.findOne({ _id: new ObjectId(id) })
         res.send(data)
 
     }
@@ -80,7 +80,44 @@ const getBikeDetails = async (req: Request, res: Response): Promise<void> => {
 
 }
 
+
+// update bike card view count 
+
+
+
+const updateBikeView = async (req: Request, res: Response): Promise<void> => {
+    const id = req.params.id;
+
+    try {
+        const bikeData = await bikeDataCollection.findOne({ _id: new ObjectId(id) });
+
+        if (!bikeData) {
+            res.send({ success: false, message: 'Bike data not found' });
+            return;
+        }
+
+        const updateRes = await bikeDataCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { total_view: (bikeData.total_view + 1) } }
+        );
+
+        if (updateRes.modifiedCount > 0) {
+            res.send({ success: true, message: 'Bike view count updated' });
+        } else {
+            res.send({ success: false, message: 'Bike view count not updated' });
+        }
+    } catch (error) {
+        console.error('Error updating bike data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+export default updateBikeView;
+
+
 export {
     getBikeData,
     getBikeDetails,
+    updateBikeView,
+    
 };
