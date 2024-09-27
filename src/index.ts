@@ -16,11 +16,14 @@ app.use(cors({
 }));
 
 
-import bikeData from './Routes/bikeData.route';
 import { connectDB, db } from './Utils/DB_Connection';
 const dd= connectDB
 
+import bikeData from './Routes/bikeData.route';
+import userData from './Routes/userData.route'
+
 app.use(express.json());
+app.use('/users',userData)
 app.use('/bikeData',bikeData)
 
 
