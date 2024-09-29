@@ -21,10 +21,12 @@ const dd= connectDB
 
 import bikeData from './Routes/bikeData.route';
 import userData from './Routes/userData.route'
+import shopData from './Routes/shopData.route'
 
 app.use(express.json());
 app.use('/users',userData)
 app.use('/bikeData',bikeData)
+app.use('/shopData',shopData)
 
 
 // Routes
