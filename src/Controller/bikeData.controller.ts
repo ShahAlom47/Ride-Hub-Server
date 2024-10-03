@@ -79,6 +79,38 @@ const getBikeDetails = async (req: Request, res: Response): Promise<void> => {
 
 
 }
+const getLatestBikes = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const results = await bikeDataCollection.aggregate([
+            {
+                $group: {
+                    _id: '$brand',
+                    bikes: { $push: '$$ROOT' }
+
+                }
+            },
+            {
+                $project: {
+                    brand: '$_id',
+                    bikes: { $slice: ['$bikes', 2] }
+                }
+            },
+            {
+                $unwind: "$bikes" 
+            },
+            {
+                $replaceRoot: { newRoot: "$bikes" } 
+            }
+
+
+        ]).toArray();
+
+        res.send({ data: results });
+    } catch (error) {
+        console.error('Error fetching latest bike data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
 
 
 // update bike card view count 
@@ -119,5 +151,6 @@ export {
     getBikeData,
     getBikeDetails,
     updateBikeView,
-    
+    getLatestBikes,
+
 };
