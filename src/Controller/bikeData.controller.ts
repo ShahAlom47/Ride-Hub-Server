@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
-import { getBikeCollection } from '../Utils/AllDbCollection';
+import { getBikeCollection, getProductCollection } from '../Utils/AllDbCollection';
 import { ObjectId } from 'mongodb';
 
 
 const bikeDataCollection = getBikeCollection();
+const productCollection = getProductCollection();
 
 const getBikeData = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -96,10 +97,10 @@ const getLatestBikes = async (req: Request, res: Response): Promise<void> => {
                 }
             },
             {
-                $unwind: "$bikes" 
+                $unwind: "$bikes"
             },
             {
-                $replaceRoot: { newRoot: "$bikes" } 
+                $replaceRoot: { newRoot: "$bikes" }
             }
 
 
@@ -144,6 +145,46 @@ const updateBikeView = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+
+const getWishListData = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const category = req.params.category;
+        const { ids } = req.body; 
+
+        if (!category || !ids || !Array.isArray(ids)) {
+            res.send({ success: false, message: 'Category or IDs not available' });
+            return;
+        }
+
+        if (category === 'bike') {
+            const bikeIds = ids.map(id => new ObjectId(id)); 
+
+            const bikes = await bikeDataCollection.find({
+                _id: { $in: bikeIds }
+            }).toArray();
+
+            res.send(bikes);
+            return;
+        }
+        if (category === 'shop') {
+            const bikeIds = ids.map(id => new ObjectId(id));
+
+            const bikes = await productCollection.find({
+                _id: { $in: bikeIds }
+            }).toArray(); 
+
+            res.send(bikes);
+            return;
+        }
+
+    } catch (error) {
+        console.error('Error fetching WishData:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
+
 export default updateBikeView;
 
 
@@ -152,5 +193,6 @@ export {
     getBikeDetails,
     updateBikeView,
     getLatestBikes,
+    getWishListData,
 
 };
