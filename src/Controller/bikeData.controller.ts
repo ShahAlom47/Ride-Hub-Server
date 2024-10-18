@@ -166,7 +166,7 @@ const getWishListData = async (req: Request, res: Response): Promise<void> => {
             res.send(bikes);
             return;
         }
-        if (category === 'shop') {
+        if (category === 'product') {
             const bikeIds = ids.map(id => new ObjectId(id));
 
             const bikes = await productCollection.find({
