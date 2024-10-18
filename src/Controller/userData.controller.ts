@@ -51,6 +51,31 @@ const addUser = async (req: Request, res: Response): Promise<void> => {
         res.send({ status: false, error: 'Failed to create user' });
     }
 };
+const getUserData = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userEmail = req.params.email;
+        if (!userEmail) {
+            res.status(400).send({ status: false, message: 'Invalid user email' });
+            return;
+        }
+
+        const user = await userCollection.findOne({ userEmail: userEmail }, { projection: { userPassword: 0 } }); 
+      
+        if (!user) {
+            res.status(404).send({ status: false, message: 'User Not Found' });
+            return;
+        }
+
+        res.status(200).send({data:user,status:true,message:'success'});
+
+    } catch (error) {
+        console.error('Error getting user:', error);
+        res.status(500).send({ status: false, error: 'Failed to getting user' });
+    }
+};
+
+
+
 
 
 
@@ -183,4 +208,5 @@ export {
     addToCartProduct,
     getCartProduct,
     removeCartProduct,
+    getUserData,
 };
