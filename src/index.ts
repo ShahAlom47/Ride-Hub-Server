@@ -25,11 +25,14 @@ import bikeData from './Routes/bikeData.route';
 import userData from './Routes/userData.route'
 import shopData from './Routes/shopData.route'
 import sendEmail from './Utils/sendEmail';
+import couponData from './Routes/couponData.route';
 
 app.use(express.json());
 app.use('/users',userData)
 app.use('/bikeData',bikeData)
 app.use('/shopData',shopData)
+app.use('/coupon',couponData)
+
 
 
 // send email 
@@ -64,3 +67,6 @@ app.get('/', (req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+
+

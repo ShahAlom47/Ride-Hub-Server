@@ -22,10 +22,18 @@ const getProductCollection = (): Collection => {
     }
     return db.collection('shopProductsData');
 }
+const getCouponCollection = (): Collection => {
+    if (!db) {
+        console.log(db);
+        throw new Error('Database not initialized');
+    }
+    return db.collection('couponData');
+}
 
 export { 
     getBikeCollection ,
     getUserCollection,
     getProductCollection,
+    getCouponCollection,
 
 };
