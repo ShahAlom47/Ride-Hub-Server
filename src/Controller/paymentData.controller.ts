@@ -14,7 +14,7 @@ const getStripeSecretKey = async (req: Request, res: Response): Promise<void> =>
         const amountInt: number = Math.round(100 * amountValue); 
 
         const MAX_AMOUNT = 99999999; // in the smallest currency unit, for AED this is 999,999.99 AED
-        console.log('Stripe Secret Key:', process.env.STRIPE_SECRET_KEY);
+       
 
         // Check if the amount exceeds the maximum allowed
         if (amountInt > MAX_AMOUNT) {
