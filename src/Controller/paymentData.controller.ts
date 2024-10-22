@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
+import { getPaymentCollection } from '../Utils/AllDbCollection';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+const paymentCollection = getPaymentCollection()
 
 const getStripeSecretKey = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -36,6 +38,35 @@ const getStripeSecretKey = async (req: Request, res: Response): Promise<void> =>
     }
 };
 
+const addPaymentData = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { paymentData } = req.body;
+        
+        // Check if paymentData is provided
+        if (!paymentData) {
+            res.send({ status: false, message: 'Payment data is missing.' });
+            return;
+        }
+
+        const addingRes = await paymentCollection.insertOne(paymentData);
+
+        if (addingRes.insertedId) {
+            res.send({ status: true, message: 'Payment completed successfully.' });
+            return;
+        } else {
+            res.send({ status: false, message: 'Failed to process payment.' });
+        }
+
+    } catch (error) {
+        console.error('Error adding payment data:', error);
+        res.send({ status: false, message: 'An error occurred while adding payment data.' });
+    }
+};
+
+
+
+
 export {
     getStripeSecretKey,
+    addPaymentData,
 };

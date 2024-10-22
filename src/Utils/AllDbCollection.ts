@@ -29,11 +29,19 @@ const getCouponCollection = (): Collection => {
     }
     return db.collection('couponData');
 }
+const getPaymentCollection = (): Collection => {
+    if (!db) {
+        console.log(db);
+        throw new Error('Database not initialized');
+    }
+    return db.collection('paymentData');
+}
 
 export { 
     getBikeCollection ,
     getUserCollection,
     getProductCollection,
     getCouponCollection,
+    getPaymentCollection
 
 };
