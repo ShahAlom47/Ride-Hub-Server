@@ -117,23 +117,7 @@ const addToCartProduct = async (req: Request, res: Response): Promise<void> => {
 };
 
 
-// const getCartProduct = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const userEmail = req.params.email;
 
-//         const user = await userCollection.findOne({ userEmail: userEmail });
-
-//         const cartProductIds = user?.cartProductIds.map((id: string) => new ObjectId(id));
-
-//         const result = await productCollection.find({ _id: { $in: cartProductIds } }).toArray();
-
-//         res.send(result);
-
-//     } catch (error) {
-//         console.error('Error getting product :', error);
-//         res.status(500).send({ status: false, message: 'Failed to getting product ' });
-//     }
-// };
 
 const getCartProduct = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -198,6 +182,34 @@ const removeCartProduct = async (req: Request, res: Response): Promise<void> => 
 };
 
 
+const clearCartProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const  userEmail  = req.params.email;
+        const user = await userCollection.findOne({ userEmail: userEmail });
+
+        if (!user) {
+            res.send({ status: false, message: 'User not found' });
+            return;
+        }
+
+        const result = await userCollection.updateOne(
+            { userEmail: userEmail },
+            { $set: { cartProductIds: [] } }
+        );
+        if (result.modifiedCount === 0) {
+            res.send({ status: false, message: 'Failed to remove the product from cart' });
+            return;
+        }
+
+        res.send({ status: true, message: 'Product removed from cart successfully' });
+
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        res.status(500).send({ status: false, message: 'Failed to delete product' });
+    }
+};
+
+
 export default addToCartProduct;
 
 
@@ -209,4 +221,5 @@ export {
     getCartProduct,
     removeCartProduct,
     getUserData,
+    clearCartProduct,
 };

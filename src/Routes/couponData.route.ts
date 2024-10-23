@@ -1,11 +1,12 @@
 import { Router } from 'express';
 const router = Router();
 
-import { checkCoupon, getCoupon } from '../Controller/couponData.controller';
+import { addCouponUser, checkCoupon, getCoupon } from '../Controller/couponData.controller';
 
 
 router.get('/getCoupon',getCoupon)
 router.post('/checkCoupon',checkCoupon)
+router.patch('/addCouponUser/:category',addCouponUser)
 
 
 export default router;

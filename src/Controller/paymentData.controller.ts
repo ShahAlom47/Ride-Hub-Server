@@ -51,7 +51,7 @@ const addPaymentData = async (req: Request, res: Response): Promise<void> => {
         const addingRes = await paymentCollection.insertOne(paymentData);
 
         if (addingRes.insertedId) {
-            res.send({ status: true, message: 'Payment completed successfully.' });
+            res.send({ status: true, message: 'Payment completed successfully.', orderId:addingRes?.insertedId });
             return;
         } else {
             res.send({ status: false, message: 'Failed to process payment.' });
