@@ -63,10 +63,27 @@ const addPaymentData = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+const getUserOrderData = async (req: Request, res: Response): Promise<void> => {
+try{
+
+    const userEmail = req.params.email;
+    console.log(userEmail);
+    const result = await paymentCollection.find({userEmail:userEmail}).toArray();
+    res.send(result)
+    return
+
+} catch (error) {
+    console.error('Error getting order data : ', error);
+    res.send({ error: 'Failed to create payment intent' });
+}
+
+}
+
 
 
 
 export {
     getStripeSecretKey,
     addPaymentData,
+    getUserOrderData,
 };
