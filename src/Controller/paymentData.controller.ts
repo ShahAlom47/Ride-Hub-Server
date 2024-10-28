@@ -2,9 +2,14 @@ import { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { getPaymentCollection } from '../Utils/AllDbCollection';
 import { ObjectId } from 'mongodb';
+import verifyToken from '../Middleware/verifyToken';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const paymentCollection = getPaymentCollection()
+
+
+
+
 
 const getStripeSecretKey = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -39,7 +44,7 @@ const getStripeSecretKey = async (req: Request, res: Response): Promise<void> =>
     }
 };
 
-const addPaymentData = async (req: Request, res: Response): Promise<void> => {
+const addPaymentData = async (req: Request,  res: Response): Promise<void> => {
     try {
         const { paymentData } = req.body;
 
