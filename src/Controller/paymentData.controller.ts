@@ -44,7 +44,7 @@ const getStripeSecretKey = async (req: Request, res: Response): Promise<void> =>
     }
 };
 
-const addPaymentData = async (req: Request,  res: Response): Promise<void> => {
+const addPaymentData = async (req: Request, res: Response): Promise<void> => {
     try {
         const { paymentData } = req.body;
 
@@ -90,7 +90,7 @@ const cancelOrder = async (req: Request, res: Response): Promise<void> => {
         const productId = req.params.id;
 
         if (!ObjectId.isValid(productId)) {
-            res.send({ status:false, message: 'Invalid Product ID' });
+            res.send({ status: false, message: 'Invalid Product ID' });
             return;
         }
 
@@ -101,11 +101,11 @@ const cancelOrder = async (req: Request, res: Response): Promise<void> => {
 
 
         if (updateRes.modifiedCount === 0) {
-            res.send({ status:false, message: 'Order not found or already cancelled.' });
+            res.send({ status: false, message: 'Order not found or already cancelled.' });
             return;
         }
 
-        res.send({status:true, message: 'Order cancelled successfully.' });
+        res.send({ status: true, message: 'Order cancelled successfully.' });
 
     } catch (error) {
         console.error('Error while cancelling order: ', error);
@@ -115,10 +115,74 @@ const cancelOrder = async (req: Request, res: Response): Promise<void> => {
 
 
 
+const getAllOrder = async (req: Request, res: Response): Promise<void> => {
+    const itemPerPage = parseInt(req.query.item as string) || 10; 
+    const searchValue = req.query.search || '';
+    const filterDate = req.query.filterDate ? new Date(req.query.filterDate as string) : null; 
+    const currentPage = parseInt(req.query.currentPage as string) || 1;
+
+    console.log(searchValue, itemPerPage, filterDate, currentPage);
+
+    try {
+        const query: any = {}; // Type any or define your schema type
+
+        // Search query
+        // if (searchValue) {
+        //     query.$or = [
+        //         { name: { $regex: searchValue, $options: 'i' } }, 
+        //         { email: { $regex: searchValue, $options: 'i' } }
+        //     ];
+        // }
+
+        // Date filtering
+        // if (filterDate) {
+        //     const startOfDay = new Date(filterDate);
+        //     startOfDay.setHours(0, 0, 0, 0); // শুরু সময় 00:00:00
+
+        //     const endOfDay = new Date(filterDate);
+        //     endOfDay.setHours(23, 59, 59, 999); // শেষ সময় 23:59:59.999
+
+        //     query.orderDate = { $gte: startOfDay, $lte: endOfDay }; // নির্দিষ্ট দিনে সমস্ত অর্ডার ফিল্টার করা
+        // }
+
+       
+        const skipItems = (currentPage - 1) * itemPerPage;
+
+   
+        const orders = await paymentCollection.find(query)
+            .skip(skipItems) 
+            .limit(itemPerPage)
+            .sort({ orderDate: -1 })
+            .toArray();
+
+     
+        const totalOrders = await paymentCollection.countDocuments(query);
+
+       
+        res.send({
+            orders,
+            totalPages: Math.ceil(totalOrders / itemPerPage),
+            currentPage,
+        });
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).send({ message: 'Server error occurred' });
+    }
+};
+
+export default getAllOrder;
+
+
+
+
+
+
+
 
 export {
     getStripeSecretKey,
     addPaymentData,
     getUserOrderData,
     cancelOrder,
+    getAllOrder,
 };
