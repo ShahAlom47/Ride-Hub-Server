@@ -118,47 +118,46 @@ const cancelOrder = async (req: Request, res: Response): Promise<void> => {
 const getAllOrder = async (req: Request, res: Response): Promise<void> => {
     const itemPerPage = parseInt(req.query.item as string) || 10; 
     const searchValue = req.query.search || '';
-    const filterDate = req.query.filterDate ? new Date(req.query.filterDate as string) : null; 
+    const filterDateString = req.query.filterDate as string; // Get as string
+    const filterDate = filterDateString ? new Date(filterDateString) : null; 
     const currentPage = parseInt(req.query.currentPage as string) || 1;
 
-    console.log(searchValue, itemPerPage, filterDate, currentPage);
+    console.log(filterDate);
 
     try {
-        const query: any = {}; // Type any or define your schema type
+        const query: any = {}; 
 
         // Search query
-        // if (searchValue) {
-        //     query.$or = [
-        //         { name: { $regex: searchValue, $options: 'i' } }, 
-        //         { email: { $regex: searchValue, $options: 'i' } }
-        //     ];
-        // }
+        if (searchValue) {
+            query.$or = [
+                { name: { $regex: searchValue, $options: 'i' } }, 
+                { email: { $regex: searchValue, $options: 'i' } }
+            ];
+        }
 
-        // Date filtering
-        // if (filterDate) {
-        //     const startOfDay = new Date(filterDate);
-        //     startOfDay.setHours(0, 0, 0, 0); // শুরু সময় 00:00:00
+        // Month and Year filtering
+        if (filterDate) {
+            const month = filterDate.getMonth() + 1; // Local time zone month
+            const year = filterDate.getFullYear(); // Local time zone year
+        
+            query.$expr = {
+                $and: [
+                    { $eq: [{ $month: { $toDate: "$orderDate" } }, month] },
+                    { $eq: [{ $year: { $toDate: "$orderDate" } }, year] }
+                ]
+            };
+        }
 
-        //     const endOfDay = new Date(filterDate);
-        //     endOfDay.setHours(23, 59, 59, 999); // শেষ সময় 23:59:59.999
-
-        //     query.orderDate = { $gte: startOfDay, $lte: endOfDay }; // নির্দিষ্ট দিনে সমস্ত অর্ডার ফিল্টার করা
-        // }
-
-       
         const skipItems = (currentPage - 1) * itemPerPage;
 
-   
         const orders = await paymentCollection.find(query)
             .skip(skipItems) 
             .limit(itemPerPage)
             .sort({ orderDate: -1 })
             .toArray();
 
-     
         const totalOrders = await paymentCollection.countDocuments(query);
 
-       
         res.send({
             orders,
             totalPages: Math.ceil(totalOrders / itemPerPage),
@@ -169,6 +168,8 @@ const getAllOrder = async (req: Request, res: Response): Promise<void> => {
         res.status(500).send({ message: 'Server error occurred' });
     }
 };
+
+
 
 export default getAllOrder;
 
