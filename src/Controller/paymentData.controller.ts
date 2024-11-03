@@ -116,21 +116,21 @@ const cancelOrder = async (req: Request, res: Response): Promise<void> => {
 
 
 const getAllOrder = async (req: Request, res: Response): Promise<void> => {
-    const itemPerPage = parseInt(req.query.item as string) || 10; 
+    const itemPerPage = parseInt(req.query.item as string) || 10;
     const searchValue = req.query.search || '';
     const filterDateString = req.query.filterDate as string; // Get as string
-    const filterDate = filterDateString ? new Date(filterDateString) : null; 
+    const filterDate = filterDateString ? new Date(filterDateString) : null;
     const currentPage = parseInt(req.query.currentPage as string) || 1;
 
     console.log(filterDate);
 
     try {
-        const query: any = {}; 
+        const query: any = {};
 
         // Search query
         if (searchValue) {
             query.$or = [
-                { name: { $regex: searchValue, $options: 'i' } }, 
+                { name: { $regex: searchValue, $options: 'i' } },
                 { email: { $regex: searchValue, $options: 'i' } }
             ];
         }
@@ -139,7 +139,7 @@ const getAllOrder = async (req: Request, res: Response): Promise<void> => {
         if (filterDate) {
             const month = filterDate.getMonth() + 1; // Local time zone month
             const year = filterDate.getFullYear(); // Local time zone year
-        
+
             query.$expr = {
                 $and: [
                     { $eq: [{ $month: { $toDate: "$orderDate" } }, month] },
@@ -151,23 +151,50 @@ const getAllOrder = async (req: Request, res: Response): Promise<void> => {
         const skipItems = (currentPage - 1) * itemPerPage;
 
         const orders = await paymentCollection.find(query)
-            .skip(skipItems) 
+            .skip(skipItems)
             .limit(itemPerPage)
             .sort({ orderDate: -1 })
             .toArray();
 
+        // Order summary aggregation
+        const orderSummary = await paymentCollection.aggregate([
+            {
+                $match: { status: { $ne: "Cancelled" } }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: "$finalAmount" },
+                    totalTransactions: { $sum: 1 },
+                    totalCustomers: { $addToSet: "$userEmail" },
+                    totalProductsSold: { $sum: "$totalProduct" }
+                }
+            },
+            {
+                $project: {
+                    totalRevenue: 1,
+                    totalTransactions: 1,
+                    totalCustomers: { $size: "$totalCustomers" },
+                    totalProductsSold: 1
+                }
+            }
+        ]).toArray();
+
         const totalOrders = await paymentCollection.countDocuments(query);
 
+        // Sending response with orders, pagination info, and summary
         res.send({
             orders,
             totalPages: Math.ceil(totalOrders / itemPerPage),
             currentPage,
+            orderSummary: orderSummary[0] || {} // Return the first item of the aggregation result or empty object if none
         });
     } catch (error) {
         console.error('Error fetching orders:', error);
         res.status(500).send({ message: 'Server error occurred' });
     }
 };
+
 
 
 
