@@ -196,9 +196,30 @@ const getAllOrder = async (req: Request, res: Response): Promise<void> => {
 };
 
 
+const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const id = req.params.id;
+        const { status } = req.body;
+        const updateRes = await paymentCollection.updateOne({ _id: new ObjectId(id) }, {
+            $set: { status: status }
+        })
+        if (updateRes.modifiedCount > 0) {
+            res.send({ status: true, message: 'Order Status Updated Successfully' });
+            return
+        }
+        res.send({ status: false, message: 'Order Status Update Failed' });
+
+    } catch (error) {
+
+        res.send({ status: false, message: 'Order Status Update Failed' });
 
 
-export default getAllOrder;
+    }
+
+}
+
+
+
 
 
 
@@ -213,4 +234,5 @@ export {
     getUserOrderData,
     cancelOrder,
     getAllOrder,
+    updateOrderStatus
 };
