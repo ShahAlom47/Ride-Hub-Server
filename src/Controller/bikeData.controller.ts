@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getBikeCollection, getProductCollection } from '../Utils/AllDbCollection';
 import { ObjectId } from 'mongodb';
+import { error } from 'console';
 
 
 const bikeDataCollection = getBikeCollection();
@@ -115,9 +116,6 @@ const getLatestBikes = async (req: Request, res: Response): Promise<void> => {
 
 
 // update bike card view count 
-
-
-
 const updateBikeView = async (req: Request, res: Response): Promise<void> => {
     const id = req.params.id;
 
@@ -149,7 +147,7 @@ const updateBikeView = async (req: Request, res: Response): Promise<void> => {
 const getWishListData = async (req: Request, res: Response): Promise<void> => {
     try {
         const category = req.params.category;
-        const { ids } = req.body; 
+        const { ids } = req.body;
 
         if (!category || !ids || !Array.isArray(ids)) {
             res.send({ success: false, message: 'Category or IDs not available' });
@@ -157,7 +155,7 @@ const getWishListData = async (req: Request, res: Response): Promise<void> => {
         }
 
         if (category === 'bike') {
-            const bikeIds = ids.map(id => new ObjectId(id)); 
+            const bikeIds = ids.map(id => new ObjectId(id));
 
             const bikes = await bikeDataCollection.find({
                 _id: { $in: bikeIds }
@@ -171,7 +169,7 @@ const getWishListData = async (req: Request, res: Response): Promise<void> => {
 
             const bikes = await productCollection.find({
                 _id: { $in: bikeIds }
-            }).toArray(); 
+            }).toArray();
 
             res.send(bikes);
             return;
@@ -184,6 +182,62 @@ const getWishListData = async (req: Request, res: Response): Promise<void> => {
 };
 
 
+//    update    bike rent status 
+const updateBikeRentStatus = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const bikeId = req.params.id;
+        const rentDate = req.body;
+        // console.log(bikeId,rentDate);
+
+        // বাইক খুঁজে বের করা
+        const findBike = await bikeDataCollection.findOne({ _id: new ObjectId(bikeId) });
+        if (!findBike) {
+            res.send({ status: false, message: 'Bike Not Found' });
+            return; // বাইক না পাওয়া গেলে, ফাংশনটি বন্ধ করে দেয়া
+        }
+
+        // যদি rentals নেই, নতুন rentals অ্যারে তৈরি করা
+        if (!findBike?.rentals) {
+            const rentRes = await bikeDataCollection.updateOne(
+                { _id: new ObjectId(bikeId) },
+                {
+                    $set: {
+                        rentals: [rentDate] // rentals ফিল্ডে rentDate যোগ করা
+                    }
+                }
+            );
+
+            if (rentRes.modifiedCount > 0) {
+                res.send({ status: true, message: 'Rent date Added successfully' });
+                return;
+            }
+        }
+
+        // যদি rentals আগে থেকেই থাকে, rentData যোগ করা
+        const rentRes = await bikeDataCollection.updateOne(
+            { _id: new ObjectId(bikeId) },
+            {
+                $push: {
+                    rentals: rentDate // rentals অ্যারে-তে rentDate পুশ করা
+                }
+            }
+        );
+
+        if (rentRes.modifiedCount > 0) {
+            res.send({ status: true, message: 'Rent date Added successfully' });
+        } else {
+            res.send({ status: false, message: 'Failed to add rent date' });
+        }
+
+    } catch (err) {
+        console.log(err); // ত্রুটির লগিং
+        res.send({ status: false, message: 'An error occurred' });
+    }
+};
+
+
+
+
 
 export default updateBikeView;
 
@@ -194,5 +248,6 @@ export {
     updateBikeView,
     getLatestBikes,
     getWishListData,
+    updateBikeRentStatus,
 
 };
