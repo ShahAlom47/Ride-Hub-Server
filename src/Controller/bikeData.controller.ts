@@ -193,16 +193,16 @@ const updateBikeRentStatus = async (req: Request, res: Response): Promise<void> 
         const findBike = await bikeDataCollection.findOne({ _id: new ObjectId(bikeId) });
         if (!findBike) {
             res.send({ status: false, message: 'Bike Not Found' });
-            return; // বাইক না পাওয়া গেলে, ফাংশনটি বন্ধ করে দেয়া
+            return; 
         }
 
-        // যদি rentals নেই, নতুন rentals অ্যারে তৈরি করা
+        
         if (!findBike?.rentals) {
             const rentRes = await bikeDataCollection.updateOne(
                 { _id: new ObjectId(bikeId) },
                 {
                     $set: {
-                        rentals: [rentDate] // rentals ফিল্ডে rentDate যোগ করা
+                        rentals: [rentDate] 
                     }
                 }
             );
@@ -213,12 +213,12 @@ const updateBikeRentStatus = async (req: Request, res: Response): Promise<void> 
             }
         }
 
-        // যদি rentals আগে থেকেই থাকে, rentData যোগ করা
+     
         const rentRes = await bikeDataCollection.updateOne(
             { _id: new ObjectId(bikeId) },
             {
                 $push: {
-                    rentals: rentDate // rentals অ্যারে-তে rentDate পুশ করা
+                    rentals: rentDate 
                 }
             }
         );
@@ -230,7 +230,7 @@ const updateBikeRentStatus = async (req: Request, res: Response): Promise<void> 
         }
 
     } catch (err) {
-        console.log(err); // ত্রুটির লগিং
+        console.log(err); 
         res.send({ status: false, message: 'An error occurred' });
     }
 };

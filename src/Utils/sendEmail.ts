@@ -34,7 +34,7 @@ const sendMail = async (mailData : MailDataType) => {
 
 const sendEmail=async (req: Request, res: Response): Promise<void> => {
     const mailData = req.body;
-    console.log(mailData, 22);
+    
   
     // Basic validation to check if required fields are provided
     if (!mailData || !mailData.to || !mailData.subject || !mailData.html) {
@@ -44,7 +44,7 @@ const sendEmail=async (req: Request, res: Response): Promise<void> => {
   
     try {
         const emailResponse = await sendMail(mailData);
-       console.log(emailResponse);
+      
         res.send({ success: true, message: 'Email sent successfully!', });
     } catch (error) {
         console.error('Error sending email:', error); 
