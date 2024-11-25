@@ -143,6 +143,39 @@ const updateBikeView = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+// edit bike data 
+
+
+const editBikeData = async (req: Request, res: Response): Promise<void> => {
+    const id = req.params.id;
+    const updateData = req.body;
+
+    try {
+        // Find existing bike data
+        const bikeData = await bikeDataCollection.findOne({ _id: new ObjectId(id) });
+
+        if (!bikeData) {
+            res.status(404).send({ success: false, message: 'Bike data not found' });
+            return;
+        }
+        delete updateData._id;
+        // Update the bike data
+        const updateRes = await bikeDataCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: updateData } // Use `$set` to update specific fields
+        );
+      
+
+        if (updateRes.modifiedCount > 0) {
+            res.send({ success: true, message: 'Bike Data updated' });
+        } else {
+            res.send({ success: false, message: 'No changes made to the Bike Data' });
+        }
+    } catch (error) {
+        console.error('Error updating bike data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
 
 const getWishListData = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -249,5 +282,6 @@ export {
     getLatestBikes,
     getWishListData,
     updateBikeRentStatus,
+    editBikeData,
 
 };
