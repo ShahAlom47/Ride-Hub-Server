@@ -27,6 +27,7 @@ import shopData from './Routes/shopData.route'
 import sendEmail from './Utils/sendEmail';
 import couponData from './Routes/couponData.route';
 import paymentData from './Routes/paymentData.route';
+import { upload, uploadImage } from './Utils/photoUpload';
 
 app.use(express.json());
 app.use('/users',userData)
@@ -37,6 +38,8 @@ app.use('/payment',paymentData)
 
 
 app.post('/sendEmail', sendEmail )
+app.post("/upload", upload.single("file"), uploadImage);
+
 
 
 // Routes
