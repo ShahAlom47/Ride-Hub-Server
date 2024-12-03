@@ -177,6 +177,41 @@ const editBikeData = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+
+const editBikePhoto = async (req: Request, res: Response): Promise<void> => {
+    const id = req.params.id;
+    const { imageUrl } = req.body; 
+
+    console.log(id,imageUrl);
+
+    if (!ObjectId.isValid(id)) {
+        res.status(400).json({ success: false, message: 'Invalid bike ID' });
+        return;
+    }
+
+    if (!imageUrl) {
+        res.status(400).json({ success: false, message: 'Image URL is required' });
+        return;
+    }
+
+    try {
+       
+        const updateRes = await bikeDataCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: {bike_image: imageUrl } }
+        );
+
+        if (updateRes.modifiedCount > 0) {
+            res.json({ success: true, message: 'Bike photo updated successfully' });
+        } else {
+            res.json({ success: false, message: 'No changes made to the bike photo' });
+        }
+    } catch (error) {
+        console.error('Error updating bike photo:', error);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+};
+
 const getWishListData = async (req: Request, res: Response): Promise<void> => {
     try {
         const category = req.params.category;
@@ -283,5 +318,6 @@ export {
     getWishListData,
     updateBikeRentStatus,
     editBikeData,
+    editBikePhoto,
 
 };
