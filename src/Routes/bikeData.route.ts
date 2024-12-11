@@ -1,7 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 
-import updateBikeView, { editBikeData, editBikePhoto, getBikeData, getBikeDetails, getLatestBikes, getWishListData, updateBikeRentStatus } from '../Controller/bikeData.controller';
+import updateBikeView, { addBike, editBikeData, editBikePhoto, getBikeData, getBikeDetails, getLatestBikes, getWishListData, updateBikeRentStatus } from '../Controller/bikeData.controller';
 
 
 
@@ -13,5 +13,6 @@ router.post('/getWishListData/:category', getWishListData);
 router.patch('/updateRentStatus/:id', updateBikeRentStatus);
 router.patch('/editBikeData/:id', editBikeData);
 router.patch('/changeBikePhoto/:id', editBikePhoto);
+router.post('/addBike',addBike );
 
 export default router;

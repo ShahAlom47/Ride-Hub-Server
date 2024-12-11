@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 
 
 const app = express();
-const PORT:number = parseInt(process.env.PORT || '3000', 10)
+const PORT:number = parseInt(process.env.PORT || '4000', 10)
 dotenv.config();
 
 

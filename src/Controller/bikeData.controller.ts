@@ -304,6 +304,37 @@ const updateBikeRentStatus = async (req: Request, res: Response): Promise<void> 
 };
 
 
+// add bike 
+
+
+const addBike = async (req: Request, res: Response): Promise<void> => {
+
+
+    try {
+        const bikeData = req.body;
+        console.log(bikeData);
+
+        if (!bikeData ) {
+            res.send({ success: false, message: 'Invalid bike data provided' });
+            return;
+        }
+
+        // Insert data into the database
+        const addRes = await bikeDataCollection.insertOne(bikeData);
+
+        if (addRes.acknowledged) {
+            res.send({ success: true, message: 'Successfully added bike data', data: addRes });
+        } else {
+            res.send({ success: false, message: 'Failed to add bike data' });
+        }
+    } catch (error) {
+        // Log the error and send a response
+        console.error('Error adding bike data:', error);
+        res.status(500).send({ success: false, message: 'An error occurred while adding bike data', error });
+    }
+};
+
+
 
 
 
@@ -319,5 +350,6 @@ export {
     updateBikeRentStatus,
     editBikeData,
     editBikePhoto,
+    addBike,
 
 };
