@@ -164,7 +164,7 @@ const editBikeData = async (req: Request, res: Response): Promise<void> => {
             { _id: new ObjectId(id) },
             { $set: updateData } // Use `$set` to update specific fields
         );
-      
+
 
         if (updateRes.modifiedCount > 0) {
             res.send({ success: true, message: 'Bike Data updated' });
@@ -180,9 +180,9 @@ const editBikeData = async (req: Request, res: Response): Promise<void> => {
 
 const editBikePhoto = async (req: Request, res: Response): Promise<void> => {
     const id = req.params.id;
-    const { imageUrl } = req.body; 
+    const { imageUrl } = req.body;
 
-    console.log(id,imageUrl);
+    console.log(id, imageUrl);
 
     if (!ObjectId.isValid(id)) {
         res.status(400).json({ success: false, message: 'Invalid bike ID' });
@@ -195,10 +195,10 @@ const editBikePhoto = async (req: Request, res: Response): Promise<void> => {
     }
 
     try {
-       
+
         const updateRes = await bikeDataCollection.updateOne(
             { _id: new ObjectId(id) },
-            { $set: {bike_image: imageUrl } }
+            { $set: { bike_image: imageUrl } }
         );
 
         if (updateRes.modifiedCount > 0) {
@@ -261,16 +261,16 @@ const updateBikeRentStatus = async (req: Request, res: Response): Promise<void> 
         const findBike = await bikeDataCollection.findOne({ _id: new ObjectId(bikeId) });
         if (!findBike) {
             res.send({ status: false, message: 'Bike Not Found' });
-            return; 
+            return;
         }
 
-        
+
         if (!findBike?.rentals) {
             const rentRes = await bikeDataCollection.updateOne(
                 { _id: new ObjectId(bikeId) },
                 {
                     $set: {
-                        rentals: [rentDate] 
+                        rentals: [rentDate]
                     }
                 }
             );
@@ -281,12 +281,12 @@ const updateBikeRentStatus = async (req: Request, res: Response): Promise<void> 
             }
         }
 
-     
+
         const rentRes = await bikeDataCollection.updateOne(
             { _id: new ObjectId(bikeId) },
             {
                 $push: {
-                    rentals: rentDate 
+                    rentals: rentDate
                 }
             }
         );
@@ -298,15 +298,13 @@ const updateBikeRentStatus = async (req: Request, res: Response): Promise<void> 
         }
 
     } catch (err) {
-        console.log(err); 
+        console.log(err);
         res.send({ status: false, message: 'An error occurred' });
     }
 };
 
 
 // add bike 
-
-
 const addBike = async (req: Request, res: Response): Promise<void> => {
 
 
@@ -314,7 +312,7 @@ const addBike = async (req: Request, res: Response): Promise<void> => {
         const bikeData = req.body;
         console.log(bikeData);
 
-        if (!bikeData ) {
+        if (!bikeData) {
             res.send({ success: false, message: 'Invalid bike data provided' });
             return;
         }
@@ -335,6 +333,34 @@ const addBike = async (req: Request, res: Response): Promise<void> => {
 };
 
 
+// delete bike 
+
+
+const deleteBike = async (req: Request, res: Response): Promise<void> => {
+    try {
+       
+        const bikeId = req.params.id;
+        if (!bikeId) {
+            res.status(400).send({ success: false, message: "Bike ID is required." });
+            return;
+        }
+
+     
+        const deleteRes = await bikeDataCollection.deleteOne({ _id: new ObjectId(bikeId) });
+
+    
+        if (deleteRes.deletedCount > 0) {
+            res.status(200).send({ success: true, message: "Bike deleted successfully." });
+        } else {
+            res.status(404).send({ success: false, message: "Bike not found." });
+        }
+    } catch (error) {
+   
+        console.error("Error deleting bike:", error);
+        res.status(500).send({ success: false, message: "Internal server error." });
+    }
+};
+
 
 
 
@@ -351,5 +377,6 @@ export {
     editBikeData,
     editBikePhoto,
     addBike,
+    deleteBike,
 
 };
