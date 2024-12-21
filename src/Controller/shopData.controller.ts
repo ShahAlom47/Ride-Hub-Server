@@ -62,11 +62,27 @@ const updateProductStock = async (req: Request, res: Response): Promise<void> =>
     }
 };
 
+
+
+
+const productOnline = async (req: Request, res: Response): Promise<void> => {
+    try {
+        
+        const result = await productCollection.find({}).limit(8).toArray();
+        res.send(result);
+    } catch (error) {
+        console.error("Error fetching products:", error);
+
+        res.status(500).json({ message: "Failed to fetch products." });
+    }
+};
+
+
 export {
 
     getAllShopProduct,
     getProductDetails,
     updateProductStock,
-
+    productOnline ,
 
 };
