@@ -109,11 +109,47 @@ const productOnline = async (req: Request, res: Response): Promise<void> => {
 };
 
 
+const editProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const updateData = req.body; 
+        const id = req.params.id;
+
+      
+        if (!ObjectId.isValid(id)) {
+            res.json({success:false, message: "Invalid product ID" });
+            return;
+        }
+
+       
+        const result = await productCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: updateData }     
+        );
+
+      
+        if (result.matchedCount === 0) {
+            res.json({success:false, message: "Product not found"});
+            return;
+        }
+
+        res.send({ success:true, message: "Product updated successfully" });
+    } catch (error) {
+        console.error(error);
+        res.send({success:false, message: "Something went wrong" });
+    }
+};
+
+export default editProduct;
+
+
+
+
 export {
 
     getAllShopProduct,
     getProductDetails,
     updateProductStock,
     productOnline,
+    editProduct,
 
 };
