@@ -111,33 +111,63 @@ const productOnline = async (req: Request, res: Response): Promise<void> => {
 
 const editProduct = async (req: Request, res: Response): Promise<void> => {
     try {
-        const updateData = req.body; 
+        const updateData = req.body;
         const id = req.params.id;
 
-      
+
         if (!ObjectId.isValid(id)) {
-            res.json({success:false, message: "Invalid product ID" });
+            res.json({ success: false, message: "Invalid product ID" });
             return;
         }
 
-       
+
         const result = await productCollection.updateOne(
             { _id: new ObjectId(id) },
-            { $set: updateData }     
+            { $set: updateData }
         );
 
-      
+
         if (result.matchedCount === 0) {
-            res.json({success:false, message: "Product not found"});
+            res.json({ success: false, message: "Product not found" });
             return;
         }
 
-        res.send({ success:true, message: "Product updated successfully" });
+        res.send({ success: true, message: "Product updated successfully" });
     } catch (error) {
         console.error(error);
-        res.send({success:false, message: "Something went wrong" });
+        res.send({ success: false, message: "Something went wrong" });
     }
 };
+
+
+
+
+const addProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const productData = req.body;
+     
+        if (!productData || typeof productData !== "object") {
+            res.send({ success: false, message: "Invalid product data" });
+            return;
+        }
+
+        const result = await productCollection.insertOne(productData);
+
+        if (result.insertedId) {
+            res.send({ success: true, message: "Product added successfully", productId: result.insertedId });
+            return;
+        }
+
+        res.send({ success: false, message: "Failed to add the product" });
+    } catch (error:any) {
+        console.error("Error adding product:", error);
+        res.send({
+            success: false,
+            message: process.env.NODE_ENV === "development" ? error.message : "Something went wrong",
+        });
+    }
+};
+
 
 export default editProduct;
 
@@ -151,5 +181,6 @@ export {
     updateProductStock,
     productOnline,
     editProduct,
+    addProduct,
 
 };
