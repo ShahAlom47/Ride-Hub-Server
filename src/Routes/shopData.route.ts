@@ -1,7 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 
-import { addProduct, editProduct, getAllShopProduct, getProductDetails, productOnline, updateProductStock } from '../Controller/shopData.controller';
+import { addProduct, deleteProduct, editProduct, getAllShopProduct, getProductDetails, productOnline, updateProductStock } from '../Controller/shopData.controller';
 
 
 
@@ -11,5 +11,6 @@ router.patch('/updateStock', updateProductStock);
 router.get('/onlineProduct', productOnline);
 router.patch('/editProduct/:id', editProduct);
 router.post('/addProduct', addProduct);
+router.delete('/deleteProduct/:id', deleteProduct);
 
 export default router;

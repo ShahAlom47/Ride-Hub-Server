@@ -169,6 +169,36 @@ const addProduct = async (req: Request, res: Response): Promise<void> => {
 };
 
 
+
+
+const deleteProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+
+        // Check if ID is a valid ObjectId
+        if (!ObjectId.isValid(id)) {
+            res.status(400).json({ success: false, message: "Invalid product ID" });
+            return;
+        }
+
+        // Delete the product from the database
+        const result = await productCollection.deleteOne({ _id: new ObjectId(id) });
+
+        // Check if the product was deleted
+        if (result.deletedCount === 0) {
+            res.status(404).json({ success: false, message: "Product not found" });
+            return;
+        }
+
+        // Respond with success if the product was deleted
+        res.status(200).json({ success: true, message: "Product deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting product:", error);
+        res.status(500).json({ success: false, message: "Something went wrong" });
+    }
+};
+
+
 export default editProduct;
 
 
@@ -182,5 +212,6 @@ export {
     productOnline,
     editProduct,
     addProduct,
+    deleteProduct
 
 };
