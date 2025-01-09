@@ -363,6 +363,64 @@ const deleteBike = async (req: Request, res: Response): Promise<void> => {
 
 
 
+// Define the Bike and Rental interfaces
+interface Rental {
+    rent_start_date: string;
+    rent_end_date: string;
+    renterUser: string;
+}
+
+interface Bike {
+    _id: ObjectId;
+    brand: string;
+    model: string;
+    bike_image: string;
+    rental_price_per_day: number;
+    rentals: Rental[];
+}
+
+
+
+const getUserRentedBike = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userEmail = req.params.email;
+        console.log("User Email:", userEmail);
+
+     
+        const bikes = await bikeDataCollection.find({
+            rentals: {
+                $elemMatch: {
+                    renterUser: userEmail,
+                },
+            },
+        }).toArray();
+
+      
+        const userRentals = bikes.flatMap((bike) => {
+            return bike.rentals
+                .filter((rental:any) => rental?.renterUser === userEmail)
+                .map((rental:any) => ({
+                    bikeId: bike._id,
+                    brand: bike.brand,
+                    model: bike.model,
+                    bikeImage: bike.bike_image,
+                    rental_price_per_day: bike.rental_price_per_day,
+                    rentalDetails: rental,
+                }));
+        });
+
+        console.log("User Rentals:", userRentals);
+
+        // Respond with the transformed data
+        res.status(200).json(userRentals);
+    } catch (error) {
+        console.error("Error fetching user rented bikes:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+
+
 
 export default updateBikeView;
 
@@ -378,5 +436,6 @@ export {
     editBikePhoto,
     addBike,
     deleteBike,
+    getUserRentedBike,
 
 };
