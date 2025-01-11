@@ -10,6 +10,9 @@ node_modules
 # Secrets folder or specific files
 config/
 config/firebaseAdminServiceKey.json
+<<<<<<< HEAD
 
 # Ignore secrets folder
 config/
+=======
+>>>>>>> a3d3117 (Remove sensitive file from git history)
