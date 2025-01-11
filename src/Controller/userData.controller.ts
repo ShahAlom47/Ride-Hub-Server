@@ -209,6 +209,25 @@ const clearCartProduct = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+const getAllUser = async (req: Request, res: Response): Promise<void> => {
+    try {
+      
+
+        const users = await userCollection.find().toArray(); 
+      
+        if (!users) {
+            res.status(404).send({ status: false, message: 'Users Not Found' });
+            return;
+        }
+
+        res.status(200).send({data:users,status:true,message:'success'});
+
+    } catch (error) {
+        console.error('Error getting users:', error);
+        res.status(500).send({ status: false, error: 'Failed to getting users' });
+    }
+};
+
 
 export default addToCartProduct;
 
@@ -222,4 +241,5 @@ export {
     removeCartProduct,
     getUserData,
     clearCartProduct,
+    getAllUser,
 };
