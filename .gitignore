@@ -1,6 +1,12 @@
+# Node modules
 node_modules
+
+# Environment files
 .env
+
+# Vercel deployment config
 .vercel
 
-# Ignore secrets folder
+# Secrets folder or specific files
 config/
+config/firebaseAdminServiceKey.json
