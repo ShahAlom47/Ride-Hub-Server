@@ -10,3 +10,6 @@ node_modules
 # Secrets folder or specific files
 config/
 config/firebaseAdminServiceKey.json
+
+# Ignore secrets folder
+config/
