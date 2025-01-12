@@ -59,14 +59,14 @@ const getUserData = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const user = await userCollection.findOne({ userEmail: userEmail }, { projection: { userPassword: 0 } }); 
-      
+        const user = await userCollection.findOne({ userEmail: userEmail }, { projection: { userPassword: 0 } });
+
         if (!user) {
             res.status(404).send({ status: false, message: 'User Not Found' });
             return;
         }
 
-        res.status(200).send({data:user,status:true,message:'success'});
+        res.status(200).send({ data: user, status: true, message: 'success' });
 
     } catch (error) {
         console.error('Error getting user:', error);
@@ -184,7 +184,7 @@ const removeCartProduct = async (req: Request, res: Response): Promise<void> => 
 
 const clearCartProduct = async (req: Request, res: Response): Promise<void> => {
     try {
-        const  userEmail  = req.params.email;
+        const userEmail = req.params.email;
         const user = await userCollection.findOne({ userEmail: userEmail });
 
         if (!user) {
@@ -211,21 +211,52 @@ const clearCartProduct = async (req: Request, res: Response): Promise<void> => {
 
 const getAllUser = async (req: Request, res: Response): Promise<void> => {
     try {
-      
 
-        const users = await userCollection.find().toArray(); 
-      
+
+        const users = await userCollection.find().toArray();
+
         if (!users) {
             res.status(404).send({ status: false, message: 'Users Not Found' });
             return;
         }
 
-        res.status(200).send({data:users,status:true,message:'success'});
+        res.status(200).send({ data: users, status: true, message: 'success' });
 
     } catch (error) {
         console.error('Error getting users:', error);
         res.status(500).send({ status: false, error: 'Failed to getting users' });
     }
+};
+
+const admin = require('firebase-admin');
+// Firebase Admin SDK ইনিশিয়ালাইজ
+const serviceAccount = require('../../firbaseConfig/firebaseAdminKey.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+
+const getAllFirebaseUsers = async (req: Request, res: Response): Promise<void> => {
+ 
+  try {
+    const users: any[] = []; 
+    const listAllUsers = async (nextPageToken?: string) => {
+      const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
+      console.log(listUsersResult);
+      listUsersResult.users.forEach((userRecord:any) => {
+        users.push(userRecord.toJSON());
+      });
+      if (listUsersResult.pageToken) {
+        await listAllUsers(listUsersResult.pageToken);
+      }
+    };
+    await listAllUsers(); 
+    res.status(200).json(users); 
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Failed to fetch users.', error });
+  }
 };
 
 
@@ -242,4 +273,5 @@ export {
     getUserData,
     clearCartProduct,
     getAllUser,
+    getAllFirebaseUsers
 };

@@ -16,3 +16,6 @@ config/
 config/firebaseAdminServiceKey.json
 
 firbaseConfig/
+firbaseConfig/firebaseAdminKey.json
+
+*.json
