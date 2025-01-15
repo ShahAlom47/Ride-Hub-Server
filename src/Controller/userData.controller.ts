@@ -3,6 +3,15 @@ var jwt = require('jsonwebtoken');
 import { Collection, ObjectId } from 'mongodb';
 import { getProductCollection, getUserCollection } from '../Utils/AllDbCollection';
 import { database } from 'firebase-admin';
+const admin = require('firebase-admin');
+import { getAuth } from "firebase-admin/auth"
+
+const serviceAccount = require('../../firbaseConfig/firebaseAdminKey.json');
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+});
+
 
 const userCollection = getUserCollection()
 const productCollection = getProductCollection()
@@ -229,79 +238,98 @@ const getAllUser = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-const admin = require('firebase-admin');
-import { getAuth } from "firebase-admin/auth"
-// Firebase Admin SDK ইনিশিয়ালাইজ
-const serviceAccount = require('../../firbaseConfig/firebaseAdminKey.json');
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
 
 
 const getAllFirebaseUsers = async (req: Request, res: Response): Promise<void> => {
- 
-  try {
-    const users: any[] = []; 
-    const listAllUsers = async (nextPageToken?: string) => {
-      const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
-      listUsersResult.users.forEach((userRecord:any) => {
-        users.push(userRecord.toJSON());
-      });
-      if (listUsersResult.pageToken) {
-        await listAllUsers(listUsersResult.pageToken);
-      }
-    };
-    await listAllUsers(); 
-    res.status(200).json(users); 
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Failed to fetch users.', error });
-  }
+
+    try {
+        const users: any[] = [];
+        const listAllUsers = async (nextPageToken?: string) => {
+            const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
+            listUsersResult.users.forEach((userRecord: any) => {
+                users.push(userRecord.toJSON());
+            });
+            if (listUsersResult.pageToken) {
+                await listAllUsers(listUsersResult.pageToken);
+            }
+        };
+        await listAllUsers();
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Failed to fetch users.', error });
+    }
 };
 
 
 // delete   user  
-
-
 const deleteUser = async (req: Request, res: Response): Promise<void> => {
     const { firebaseId, databaseId } = req.query;
-  
+
     if (!firebaseId || !databaseId) {
-      res.status(400).json({
-        status: false,
-        message: "Firebase ID and Database ID are required.",
-      });
-      return;
+        res.status(400).json({
+            status: false,
+            message: "Firebase ID and Database ID are required.",
+        });
+        return;
     }
-  
+
     try {
 
-      const auth = getAuth();
-      await auth.deleteUser(firebaseId as string);
-  
-    
-      const deleteResult = await userCollection.deleteOne({ _id:  new ObjectId(databaseId as string) });
-  
-      if (deleteResult.deletedCount === 1) {
-        res.status(200).json({
-          status: true,
-          message: "User successfully deleted from Firebase and database.",
-        });
-      } else {
-        res.status(404).json({
-          status: false,
-          message: "User deleted from Firebase but not found in the database.",
-        });
-      }
+        const auth = getAuth();
+        await auth.deleteUser(firebaseId as string);
+
+
+        const deleteResult = await userCollection.deleteOne({ _id: new ObjectId(databaseId as string) });
+
+        if (deleteResult.deletedCount === 1) {
+            res.status(200).json({
+                status: true,
+                message: "User successfully deleted from Firebase and database.",
+            });
+        } else {
+            res.status(404).json({
+                status: false,
+                message: "User deleted from Firebase but not found in the database.",
+            });
+        }
     } catch (error) {
-      console.error("Error deleting user:", error);
-      res.status(500).json({
-        status: false,
-        message: "Failed to delete user. Please try again later.",
-      });
+        console.error("Error deleting user:", error);
+        res.status(500).json({
+            status: false,
+            message: "Failed to delete user. Please try again later.",
+        });
     }
-  };
+};
+
+
+const changeUserRoll = async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params; // প্যারামিটার থেকে আইডি নেওয়া
+    const { role } = req.body; // বডি থেকে নতুন রোল নেওয়া
+    console.log(role);
+
+    try {
+        // MongoDB ডাটাবেসে রোল আপডেট করা
+        const updatedUser = await userCollection.updateOne(
+            { _id: new ObjectId(id) }, // ফিল্টার: _id দিয়ে মিলছে
+            { $set: { firebaseRole: role } } // আপডেট অপারেটর: firebaseRole আপডেট হচ্ছে
+        );
+
+        // যদি ইউজার না পাওয়া যায়
+        if (updatedUser.matchedCount === 0) {
+            res.send({ status: false, message: 'User not found' });
+            return;
+        }
+
+        // সফলতার মেসেজ
+        res.send({ status: true, message: `Role updated to ${role} successfully!` });
+    } catch (error) {
+        console.error('Error updating user role:', error);
+        res.status(500).json({ status: false, message: 'Failed to update user role' });
+    }
+};
+
 
 
 export default addToCartProduct;
@@ -319,4 +347,5 @@ export {
     getAllUser,
     getAllFirebaseUsers,
     deleteUser,
+    changeUserRoll,
 };
