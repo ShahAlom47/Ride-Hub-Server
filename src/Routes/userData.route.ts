@@ -1,7 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 
-import { addToCartProduct, addUser, clearCartProduct, createToken, getAllFirebaseUsers, getAllUser, getCartProduct, getUserData, removeCartProduct } from '../Controller/userData.controller';
+import { addToCartProduct, addUser, clearCartProduct, createToken, deleteUser, getAllFirebaseUsers, getAllUser, getCartProduct, getUserData, removeCartProduct } from '../Controller/userData.controller';
 
 router.post('/jwt', createToken);
 router.post('/addUser', addUser);
@@ -12,5 +12,6 @@ router.post('/addToCartProduct/:email', addToCartProduct);
 router.get('/userCartData/:email', getCartProduct);
 router.delete('/removeCartProduct', removeCartProduct);
 router.delete('/clearCartProduct/:email', clearCartProduct);
+router.delete('/delete-user', deleteUser);
 
 export default router;

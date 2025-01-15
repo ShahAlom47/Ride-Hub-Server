@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 var jwt = require('jsonwebtoken');
-import { ObjectId } from 'mongodb';
+import { Collection, ObjectId } from 'mongodb';
 import { getProductCollection, getUserCollection } from '../Utils/AllDbCollection';
+import { database } from 'firebase-admin';
 
 const userCollection = getUserCollection()
 const productCollection = getProductCollection()
@@ -229,6 +230,7 @@ const getAllUser = async (req: Request, res: Response): Promise<void> => {
 };
 
 const admin = require('firebase-admin');
+import { getAuth } from "firebase-admin/auth"
 // Firebase Admin SDK ইনিশিয়ালাইজ
 const serviceAccount = require('../../firbaseConfig/firebaseAdminKey.json');
 
@@ -243,7 +245,6 @@ const getAllFirebaseUsers = async (req: Request, res: Response): Promise<void> =
     const users: any[] = []; 
     const listAllUsers = async (nextPageToken?: string) => {
       const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
-      console.log(listUsersResult);
       listUsersResult.users.forEach((userRecord:any) => {
         users.push(userRecord.toJSON());
       });
@@ -260,6 +261,49 @@ const getAllFirebaseUsers = async (req: Request, res: Response): Promise<void> =
 };
 
 
+// delete   user  
+
+
+const deleteUser = async (req: Request, res: Response): Promise<void> => {
+    const { firebaseId, databaseId } = req.query;
+  
+    if (!firebaseId || !databaseId) {
+      res.status(400).json({
+        status: false,
+        message: "Firebase ID and Database ID are required.",
+      });
+      return;
+    }
+  
+    try {
+
+      const auth = getAuth();
+      await auth.deleteUser(firebaseId as string);
+  
+    
+      const deleteResult = await userCollection.deleteOne({ _id:  new ObjectId(databaseId as string) });
+  
+      if (deleteResult.deletedCount === 1) {
+        res.status(200).json({
+          status: true,
+          message: "User successfully deleted from Firebase and database.",
+        });
+      } else {
+        res.status(404).json({
+          status: false,
+          message: "User deleted from Firebase but not found in the database.",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({
+        status: false,
+        message: "Failed to delete user. Please try again later.",
+      });
+    }
+  };
+
+
 export default addToCartProduct;
 
 
@@ -273,5 +317,6 @@ export {
     getUserData,
     clearCartProduct,
     getAllUser,
-    getAllFirebaseUsers
+    getAllFirebaseUsers,
+    deleteUser,
 };
