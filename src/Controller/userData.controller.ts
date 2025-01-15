@@ -305,24 +305,24 @@ const deleteUser = async (req: Request, res: Response): Promise<void> => {
 
 
 const changeUserRoll = async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params; // প্যারামিটার থেকে আইডি নেওয়া
-    const { role } = req.body; // বডি থেকে নতুন রোল নেওয়া
+    const { id } = req.params; 
+    const { role } = req.body; 
     console.log(role);
 
     try {
-        // MongoDB ডাটাবেসে রোল আপডেট করা
+   
         const updatedUser = await userCollection.updateOne(
-            { _id: new ObjectId(id) }, // ফিল্টার: _id দিয়ে মিলছে
-            { $set: { firebaseRole: role } } // আপডেট অপারেটর: firebaseRole আপডেট হচ্ছে
+            { _id: new ObjectId(id) }, 
+            { $set: { userRole: role } } 
         );
 
-        // যদি ইউজার না পাওয়া যায়
+        
         if (updatedUser.matchedCount === 0) {
             res.send({ status: false, message: 'User not found' });
             return;
         }
 
-        // সফলতার মেসেজ
+      
         res.send({ status: true, message: `Role updated to ${role} successfully!` });
     } catch (error) {
         console.error('Error updating user role:', error);
