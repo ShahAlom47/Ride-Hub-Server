@@ -223,6 +223,122 @@ const updateOrderStatus = async (req: Request, res: Response): Promise<void> => 
 
 
 
+const getSummery = async (req: Request, res: Response): Promise<void> => {
+    try {
+        // ৬ মাস আগের তারিখ বের করা
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+
+        const [summaryData] = await paymentCollection.aggregate([
+            {
+                $addFields: {
+                    createdAt: {
+                        $toDate: "$createdAt", // `createdAt` কে Date টাইপে রূপান্তর
+                    },
+                },
+            },
+            {
+                $match: {
+                    createdAt: { $gte: sixMonthsAgo },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        month: { $month: "$createdAt" },
+                        type: "$type",
+                    },
+                    totalAmount: { $sum: "$finalAmount" },
+                },
+            },
+            {
+                $group: {
+                    _id: "$_id.month",
+                    Shop: {
+                        $sum: {
+                            $cond: [{ $eq: ["$_id.type", "product_purchase"] }, "$totalAmount", 0],
+                        },
+                    },
+                    Bike: {
+                        $sum: {
+                            $cond: [{ $eq: ["$_id.type", "rent_bike"] }, "$totalAmount", 0],
+                        },
+                    },
+                    totalMonthAmount: { $sum: "$totalAmount" },
+                },
+            },
+            {
+                $addFields: {
+                    monthName: {
+                        $arrayElemAt: [
+                            [
+                                "", // Placeholder for index 0
+                                "Jan",
+                                "Feb",
+                                "Mar",
+                                "Apr",
+                                "May",
+                                "Jun",
+                                "Jul",
+                                "Aug",
+                                "Sep",
+                                "Oct",
+                                "Nov",
+                                "Dec",
+                            ],
+                            "$_id",
+                        ],
+                    },
+                },
+            },
+            {
+                $sort: { _id: 1 }, 
+            },
+            {
+                $group: {
+                    _id: null,
+                    monthlyData: {
+                        $push: {
+                            month: "$monthName",
+                            Shop: "$Shop",
+                            Bike: "$Bike",
+                            totalMonthAmount: "$totalMonthAmount",
+                        },
+                    },
+                    totalShopAmount: { $sum: "$Shop" },
+                    totalBikeAmount: { $sum: "$Bike" },
+                    totalAmount: { $sum: "$totalMonthAmount" },
+                },
+            },
+            {
+                $project: {
+                    _id: 0, 
+                    monthlyData: 1,
+                    totalShopAmount: 1,
+                    totalBikeAmount: 1,
+                    totalAmount: 1,
+                },
+            },
+        ]).toArray();
+
+     
+        res.status(200).json(summaryData);
+    } catch (error) {
+        console.error("Error generating summary data:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+
+export default getSummery;
+
+
+
+
+
+
 
 
 
@@ -234,5 +350,6 @@ export {
     getUserOrderData,
     cancelOrder,
     getAllOrder,
-    updateOrderStatus
+    updateOrderStatus,
+    getSummery,
 };
