@@ -4,7 +4,6 @@
 import { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { getUserContactCollection } from '../Utils/AllDbCollection';
-import verifyToken from '../Middleware/verifyToken';
 
 const userContactCollection = getUserContactCollection()
 
@@ -76,11 +75,27 @@ console.log(search);
 
 
 
+const deleteUserMessage = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const deleteRes = await userContactCollection.deleteOne({ _id: new ObjectId(id) }); 
+        
+        if (deleteRes.deletedCount === 1) {
+            res.status(200).json({status:true, message: "User message deleted successfully" });
+        } else {
+            res.status(404).json({status:false, message: "User message not found" });
+        }
+    } catch (error) {
+        res.status(500).json({status:false, message: "An error occurred while deleting the message", error });
+    }
+};
+
 
 
 
 export {
     addUserMessage,
     getUserMessage,
+    deleteUserMessage
 
 }
