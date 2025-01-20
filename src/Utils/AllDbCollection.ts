@@ -37,11 +37,20 @@ const getPaymentCollection = (): Collection => {
     return db.collection('paymentData');
 }
 
+const getUserContactCollection = (): Collection => {
+    if (!db) {
+        console.log(db);
+        throw new Error('Database not initialized');
+    }
+    return db.collection('UserContactData');
+}
+
 export { 
     getBikeCollection ,
     getUserCollection,
     getProductCollection,
     getCouponCollection,
-    getPaymentCollection
+    getPaymentCollection,
+    getUserContactCollection
 
 };
