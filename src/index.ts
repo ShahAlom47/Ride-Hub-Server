@@ -27,6 +27,7 @@ import shopData from './Routes/shopData.route'
 import sendEmail from './Utils/sendEmail';
 import couponData from './Routes/couponData.route';
 import paymentData from './Routes/paymentData.route';
+import userContact from './Routes/userContact'
 import { upload, uploadImage } from './Utils/photoUpload';
 
 app.use(express.json());
@@ -35,6 +36,7 @@ app.use('/bikeData',bikeData)
 app.use('/shopData',shopData)
 app.use('/coupon',couponData)
 app.use('/payment',paymentData)
+app.use('/userContact',userContact)
 
 
 app.post('/sendEmail', sendEmail )
