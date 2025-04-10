@@ -1,13 +1,14 @@
 {
   "name": "ride_hub_ts_server",
   "version": "1.0.0",
-  "main": "index.js",
-"scripts": {
-  "build": "tsc && cp -r src/views dist/views 2>/dev/null || :",
-  "start": "node dist/index.js",
-  "dev": "nodemon src/index.ts",
-  "vercel-build": "npm run build"
-},
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && xcopy /E /I /Y src\\views dist\\views || exit 0",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts",
+    "prebuild": "rimraf dist",
+    "postbuild": "copyfiles -u 1 src/**/*.html src/**/*.ejs dist/"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,7 +22,9 @@
     "@types/multer": "^1.4.12",
     "@types/node": "^22.5.5",
     "@types/stripe": "^8.0.416",
+    "copyfiles": "^2.4.1",
     "nodemon": "^3.1.5",
+    "rimraf": "^5.0.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2"
   },
