@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const router = (0, express_1.Router)();
+const userData_controller_1 = require("../Controller/userData.controller");
+router.post('/jwt', userData_controller_1.createToken);
+router.post('/addUser', userData_controller_1.addUser);
+router.get('/getUserData/:email', userData_controller_1.getUserData);
+router.get('/getAllUser', userData_controller_1.getAllUser);
+router.get('/getAllFireBaseUser', userData_controller_1.getAllFirebaseUsers);
+router.post('/addToCartProduct/:email', userData_controller_1.addToCartProduct);
+router.get('/userCartData/:email', userData_controller_1.getCartProduct);
+router.delete('/removeCartProduct', userData_controller_1.removeCartProduct);
+router.delete('/clearCartProduct/:email', userData_controller_1.clearCartProduct);
+router.delete('/delete-user', userData_controller_1.deleteUser);
+router.patch('/change-user-roll/:id', userData_controller_1.changeUserRoll);
+exports.default = router;
