@@ -3,10 +3,11 @@ const router = Router();
 
 
 import verifyToken from '../Middleware/verifyToken';
-import  getSummery, { addPaymentData, cancelOrder, getAllOrder, getStripeSecretKey, getUserOrderData, updateOrderStatus } from '../Controller/paymentData.controller';
+import  getSummery, { addPaymentData, cancelOrder, getAllOrder, getStripeSecretKey, getUserOrderData, sslInit, updateOrderStatus } from '../Controller/paymentData.controller';
 
 
 
+router.post('/ssl-init',sslInit)
 router.post('/stripe-secretKey',getStripeSecretKey)
 router.post('/addPaymentData',addPaymentData)
 router.get('/orderData/:email', verifyToken , getUserOrderData)

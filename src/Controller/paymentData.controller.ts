@@ -3,13 +3,45 @@ import Stripe from 'stripe';
 import { getPaymentCollection } from '../Utils/AllDbCollection';
 import { ObjectId } from 'mongodb';
 import verifyToken from '../Middleware/verifyToken';
+const SSLCommerzPayment = require('sslcommerz-lts');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const paymentCollection = getPaymentCollection()
 
+// SSLCommerz  
+const store_id = 'YOUR_STORE_ID';
+const store_passwd = 'YOUR_STORE_PASSWORD';
+const is_live = false; // sandbox
 
+const sslInit = async (req: Request, res: Response): Promise<void>  => {
+    const {}= req.body;
+    const data = {
+        total_amount: 100,
+        currency: 'BDT',
+        tran_id: 'TXN_' + Date.now(),
+        success_url: 'http://localhost:3030/success',
+        fail_url: 'http://localhost:3030/fail',
+        cancel_url: 'http://localhost:3030/cancel',
+        ipn_url: 'http://localhost:3030/ipn',
+        product_name: 'Test Product',
+        product_category: 'Test Category',
+        product_profile: 'general',
+        cus_name: 'John Doe',
+        cus_email: 'john@example.com',
+        cus_add1: 'Dhaka',
+        cus_phone: '01711111111',
+        cus_city: 'Dhaka',
+        cus_postcode: '1207',
+        cus_country: 'Bangladesh'
+    };
 
-
+    const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+    sslcz.init(data).then((response: any) => {
+        res.redirect(response.GatewayPageURL);
+    }).catch((err: any) => {
+        res.status(500).send('Payment initiation failed.');
+    });
+};
 
 const getStripeSecretKey = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -352,4 +384,5 @@ export {
     getAllOrder,
     updateOrderStatus,
     getSummery,
+    sslInit
 };
