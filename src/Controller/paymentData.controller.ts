@@ -9,14 +9,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const paymentCollection = getPaymentCollection()
 
 // SSLCommerz  
-const store_id = 'YOUR_STORE_ID';
-const store_passwd = 'YOUR_STORE_PASSWORD';
-const is_live = false; // sandbox
+const store_id = process.env.SSL_COMMERZ_STORE_ID || 'YOUR_STORE_ID';
+const store_passwd = process.env.SSL_COMMERZ_STORE_PASSWORD || 'YOUR_STORE_PASSWORD';
+const is_live = process.env.SSL_COMMERZ_IS_LIVE; // sandbox
 
 const sslInit = async (req: Request, res: Response): Promise<void>  => {
-    const {}= req.body;
+    const {amount}= req.body;
     const data = {
-        total_amount: 100,
+        total_amount: amount,
         currency: 'BDT',
         tran_id: 'TXN_' + Date.now(),
         success_url: 'http://localhost:3030/success',
